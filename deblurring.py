@@ -13,7 +13,7 @@ def deblur(y):
 
 def gaussian_blur(img,sigma):
 	#blur the image using Gaussian Blur; specify a sigma
-	blurred = cv.GaussianBlur(img, (3,3), sigma)
+	blurred = cv.GaussianBlur(img, (65,65), sigma)
 	return blurred
 
 # we're working with 255 x 255 pixel images
@@ -29,10 +29,9 @@ H = np.matrix(I)
 # transpose of H
 H_T = H.T
 
-# lambda > 0 is the control parameter
+# lambda > 0 is the control parameter    print(blurred)
 # we vary this to blur the image
 lam = 1
-
 # identity is the identity matrix
 identity = np.matrix(np.identity(image_size))
 
@@ -43,7 +42,9 @@ identity = np.matrix(np.identity(image_size))
 # import image
 img1 = cv.imread('img/flower1.jpg')
 img1_blurred = gaussian_blur(img1,7)
-cv.imwrite("img/img1_blurred.jpg", img1_blurred)
+cv.imwrite("img/img1_blurred7.jpg", img1_blurred)
+
+
 
 # split image into different color planes
 b, g, r = cv.split(img1)
