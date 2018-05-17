@@ -5,13 +5,20 @@ def deblur(y):
     """
     Returns the deblurred color plane.
     """
-    return 
+
+    # applying the formula (5) from the paper
+    x = (H + lam*I).T*H*y
+
+    return x
 
 # we're working with 255 x 255 pixel images
-image_size = 255 * 255
+image_size = 100 * 100
+
+# Identity matrix I
+I = np.identity(image_size)
 
 # H is our convolution matrix, used to blur the original image
-H = np.matrix(np.identity(image_size))
+H = np.matrix(I)
 # print(H)
 
 # transpose of H
@@ -44,7 +51,6 @@ r_flat = np.matrix(r_flat)
 
 # print(type(b_flat))
 
-
 # apply function to each color
 
 
@@ -53,5 +59,3 @@ r_flat = np.matrix(r_flat)
 
 # join the color planes to reform the image
 # img = cv.merge((b_deblur, g_deblur, r_deblur))
-
-
