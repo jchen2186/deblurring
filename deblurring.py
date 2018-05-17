@@ -12,7 +12,7 @@ def deblur(y):
     return x
 
 def gaussian_blur(img,sigma):
-	#blur the image using Gaussian Blur; specify a sigma
+	#blur the image using Gaussian Blur; specify a kernel (odd positive) and sigma
 	blurred = cv.GaussianBlur(img, (65,65), sigma)
 	return blurred
 
