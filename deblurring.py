@@ -28,6 +28,10 @@ def generate_H(size):
 def deblur_by_row(plane, side_dem, lam):
 	"""deblur the color plane by rows, returns the plane deblurred """
 
+	# x is the matrix containing the pixels of the original/unblurred image
+	# y is the matrix containing the pixels of the blurred image
+	# x = (H_T * H + lam * identity).I * H_T * y
+
 	"""solve for x = (H^T*H + lam*I)^-1*H^T*y
 	since we don't want to do the inverse, we will solve for (H^T*H + lam*I)x = H^T * y"""
 
@@ -48,28 +52,33 @@ def deblur_by_row(plane, side_dem, lam):
 
 	return answer
 
+# ------------------- DEFAULTS -------------------
+img_name = "flower1"
+extension = ".jpg"
+
 # BLUR OPTIONS (for gaussian blur)
-kernel = 0
-sigma = 0
+kernel = 3
+sigma = 3
 
 # lambda > 0 is the control parameter    print(blurred)
 # we vary this to debblur the image
-lam = 0
+lam = 3
 
-# x is the matrix containing the pixels of the original/unblurred image
-# y is the matrix containing the pixels of the blurred image
-# x = (H_T * H + lam * identity).I * H_T * y
+# ------------------- USER INPUT -------------------
+print("1. Use defaults.")
+print("2. Input image name, blur options, and lambda for deblur.")
+option = int(raw_input("Choose option: "))
 
-# ---------- USER INPUT -------------------
-img_name = raw_input("Choose image (without file extension): ")
-extension = raw_input("File image extension: ")
+if option == 2:
+	img_name = raw_input("Choose image (without file extension): ")
+	extension = raw_input("File image extension: ")
 
-# get blurring options
-kernel = int(raw_input("Gaussian kernel: "))
-sigma = int(raw_input("Gaussian sigma: "))
+	# get blurring options
+	kernel = int(raw_input("Gaussian kernel: "))
+	sigma = int(raw_input("Gaussian sigma: "))
 
-# get lambda
-lam = int(raw_input("Lambda: "))
+	# get lambda
+	lam = int(raw_input("Lambda: "))
 
 # import image
 img_path = 'img/' + img_name + extension
