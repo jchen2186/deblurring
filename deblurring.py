@@ -48,35 +48,51 @@ def deblur_by_row(plane, side_dem, lam):
 
 	return answer
 
-# image dimensions
-x_dem = 100
-y_dem =  100
-image_size = x_dem * y_dem
-
 # BLUR OPTIONS (for gaussian blur)
-kernel = 3
-sigma = 3
+kernel = 0
+sigma = 0
 
 # lambda > 0 is the control parameter    print(blurred)
 # we vary this to debblur the image
-lam = 3
+lam = 0
 
 # x is the matrix containing the pixels of the original/unblurred image
 # y is the matrix containing the pixels of the blurred image
 # x = (H_T * H + lam * identity).I * H_T * y
 
+# ---------- USER INPUT -------------------
+img_name = raw_input("Choose image (without file extension): ")
+extension = raw_input("File image extension: ")
+
+# get blurring options
+kernel = int(raw_input("Gaussian kernel: "))
+sigma = int(raw_input("Gaussian sigma: "))
+
+# get lambda
+lam = int(raw_input("Lambda: "))
+
 # import image
-img1 = cv.imread('img/flower1_small.jpg')
-img1_blurred = gaussian_blur(img1,kernel,sigma)
-cv.imwrite("img/img1_blurred7.jpg", img1_blurred)
+img_path = 'img/' + img_name + extension
+print(img_path)
+img = cv.imread(img_path)
+
+# image dimensions
+height, width = img.shape[:2]
+image_size = height * width
+
+# blur the image and save it
+img_blurred = gaussian_blur(img,kernel,sigma)
+blurred_name = img_name + "_ker" + str(kernel) + "_sig" + str(sigma)
+blurred_path = 'img/' + blurred_name + extension
+cv.imwrite(blurred_path, img_blurred)
 
 # split image into different color planes
-b, g, r = cv.split(img1_blurred)
+b, g, r = cv.split(img_blurred)
 
 # deblur by rows - apply function to each color
-r_deblur= deblur_by_row(r, x_dem, lam)
-g_deblur = deblur_by_row(g, x_dem, lam)
-b_deblur = deblur_by_row(b, x_dem, lam)
+r_deblur= deblur_by_row(r, width, lam)
+g_deblur = deblur_by_row(g, width, lam)
+b_deblur = deblur_by_row(b, width, lam)
 
 # deblur again on the columns
 # r_deblur = deblur_by_row(r_deblur.transpose(), x_dem,lam)
@@ -85,7 +101,9 @@ b_deblur = deblur_by_row(b, x_dem, lam)
 
 # join the color planes to reform the image
 img = cv.merge((b_deblur, g_deblur, r_deblur))
-cv.imwrite("img/img1_deblurred3.jpg", img)
+deblurred_name = blurred_name + "_deblurred_lam" + str(lam)
+deblurred_path = "img/" + deblurred_name + ".jpg"
+cv.imwrite(deblurred_path, img)
 
 
 # # ---- OLD DEBLUR ----
