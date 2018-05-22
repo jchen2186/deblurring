@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import sys
 
 def deblur(y):
     """
@@ -67,22 +68,39 @@ lam = 3
 # ------------------- USER INPUT -------------------
 print("1. Use defaults.")
 print("2. Input image name, blur options, and lambda for deblur.")
-option = int(raw_input("Choose option: "))
 
-if option == 2:
-	img_name = raw_input("Choose image (without file extension): ")
-	extension = raw_input("File image extension: ")
+if (sys.version_info > (3, 0)):
+    # python 3 code
+    option = int(input("Choose option: "))
 
-	# get blurring options
-	kernel = int(raw_input("Gaussian kernel: "))
-	sigma = int(raw_input("Gaussian sigma: "))
+    if option == 2:
+        img_name = input("Choose image (without file extension): ")
+        extension = input("File image extension: ")
 
-	# get lambda
-	lam = int(raw_input("Lambda: "))
+        # get blurring options
+        kernel = int(input("Gaussian kernel: "))
+        sigma = int(input("Gaussian sigma: "))
+
+        # get lambda
+        lam = float(input("Lambda: "))
+else:
+    # python 2 code
+    option = int(raw_input("Choose option: "))
+
+    if option == 2:
+    	img_name = raw_input("Choose image (without file extension): ")
+    	extension = raw_input("File image extension: ")
+
+    	# get blurring options
+    	kernel = int(raw_input("Gaussian kernel: "))
+    	sigma = int(raw_input("Gaussian sigma: "))
+
+    	# get lambda
+    	lam = int(raw_input("Lambda: "))
 
 # import image
 img_path = 'img/' + img_name + extension
-print(img_path)
+print("Original unblurred image:", img_path)
 img = cv.imread(img_path)
 
 # image dimensions
@@ -93,6 +111,7 @@ image_size = height * width
 img_blurred = gaussian_blur(img,kernel,sigma)
 blurred_name = img_name + "_ker" + str(kernel) + "_sig" + str(sigma)
 blurred_path = 'img/' + blurred_name + extension
+print("Blurred image:", blurred_path)
 cv.imwrite(blurred_path, img_blurred)
 
 # split image into different color planes
@@ -112,6 +131,7 @@ b_deblur = deblur_by_row(b, width, lam)
 img = cv.merge((b_deblur, g_deblur, r_deblur))
 deblurred_name = blurred_name + "_deblurred_lam" + str(lam)
 deblurred_path = "img/" + deblurred_name + ".jpg"
+print("Deblurred image:", deblurred_path)
 cv.imwrite(deblurred_path, img)
 
 
