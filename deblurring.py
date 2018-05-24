@@ -13,47 +13,29 @@ def deblur(y):
     return x
 
 def gaussian_blur(img, kernel, sigma):
-	#blur the image using Gaussian Blur; specify a kernel (odd positive) and sigma
-	blurred = cv.GaussianBlur(img, (kernel,kernel), sigma)
-	return blurred
+    #blur the image using Gaussian Blur; specify a kernel (odd positive) and sigma
+    blurred = cv.GaussianBlur(img, (kernel,kernel), sigma)
+    return blurred
 
 def generate_H(size):
-	I = np.identity(size)
-	current = 1
-	for row in I:
-		if current < len(row):
-			row[current] = 1
-			current += 1
-	return np.matrix(.5 * I)
+    I = np.identity(size)
+    current = 1
+    for row in I:
+        if current < len(row):
+            row[current] = 1
+            current += 1
+    return np.matrix(.5 * I)
+
+def generate_Dv(size):
+    I = np.identity(size)
+    current = 1
+    for row in I:
+        if current < len(row):
+            row[current] = 1
+            current += -1
+    return np.matrix(I)
 
 def deblur_by_row(plane, side_dem, lam):
-	"""deblur the color plane by rows, returns the plane deblurred """
-
-	# x is the matrix containing the pixels of the original/unblurred image
-	# y is the matrix containing the pixels of the blurred image
-	# x = (H_T * H + lam * identity).I * H_T * y
-
-	"""solve for x = (H^T*H + lam*I)^-1*H^T*y
-	since we don't want to do the inverse, we will solve for (H^T*H + lam*I)x = H^T * y"""
-
-	H = generate_H(side_dem)
-	I = np.matrix(np.identity(side_dem))
-	H_transposed = H.transpose()
-
-	A = H_transposed * H + lam * I
-
-	answer = np.empty((0,side_dem))
-
-	for row in plane:
-		y = np.matrix(row).transpose() # transpose the row
-		right_side = H_transposed * y
-		x = np.linalg.solve(A, right_side) #solve the system of equation to get the deblurred image
-
-		answer = np.append(answer,x.transpose(), axis=0) #append the transpose of that to the matrix
-
-	return answer
-
-def deblur_by_col(plane, side_dem, lam):
     """deblur the color plane by rows, returns the plane deblurred """
 
     # x is the matrix containing the pixels of the original/unblurred image
@@ -64,23 +46,22 @@ def deblur_by_col(plane, side_dem, lam):
     since we don't want to do the inverse, we will solve for (H^T*H + lam*I)x = H^T * y"""
 
     H = generate_H(side_dem)
-    I = np.matrix(np.identity(side_dem))
+    # I = np.matrix(np.identity(side_dem))
     H_transposed = H.transpose()
+    D = generate_Dv(side_dem)
+    sqrt_lambda = lam ** .5
 
-    A = H_transposed * H + lam * I
+    A = H_transposed * H + (sqrt_lambda * D).T + (sqrt_lambda * D)
 
     answer = np.empty((0,side_dem))
 
-    plane = plane.transpose()
-
-    for col in plane:
-        y = np.matrix(col).transpose() # transpose the row
+    for row in plane:
+        y = np.matrix(row).transpose() # transpose the row
         right_side = H_transposed * y
         x = np.linalg.solve(A, right_side) #solve the system of equation to get the deblurred image
 
         answer = np.append(answer,x.transpose(), axis=0) #append the transpose of that to the matrix
 
-    answer = answer.transpose()
     return answer
 
 # ------------------- DEFAULTS -------------------
@@ -118,15 +99,15 @@ else:
     option = int(raw_input("Choose option: "))
 
     if option == 2:
-    	img_name = raw_input("Choose image (without file extension): ")
-    	extension = raw_input("File image extension: ")
+        img_name = raw_input("Choose image (without file extension): ")
+        extension = raw_input("File image extension: ")
 
-    	# get blurring options
-    	kernel = int(raw_input("Gaussian kernel: "))
-    	sigma = int(raw_input("Gaussian sigma: "))
+        # get blurring options
+        kernel = int(raw_input("Gaussian kernel: "))
+        sigma = int(raw_input("Gaussian sigma: "))
 
-    	# get lambda
-    	lam = int(raw_input("Lambda: "))
+        # get lambda
+        lam = int(raw_input("Lambda: "))
 
 # import image
 img_path = 'img/' + img_name + extension
@@ -152,14 +133,10 @@ r_deblur = deblur_by_row(r, width, lam)
 g_deblur = deblur_by_row(g, width, lam)
 b_deblur = deblur_by_row(b, width, lam)
 
-r_deblur = deblur_by_col(r_deblur, height, lam)
-g_deblur = deblur_by_col(g_deblur, height, lam)
-b_deblur = deblur_by_col(b_deblur, height, lam)
-
 # deblur again on the columns
-# r_deblur = deblur_by_row(r_deblur.transpose(), x_dem,lam)
-# g_deblur = deblur_by_row(g_deblur.transpose(), x_dem, lam)
-# b_deblur = deblur_by_row(b_deblur.transpose(), x_dem, lam)
+r_deblur = deblur_by_row(r_deblur.transpose(), height, lam).transpose()
+g_deblur = deblur_by_row(g_deblur.transpose(), height, lam).transpose()
+b_deblur = deblur_by_row(b_deblur.transpose(), height, lam).transpose()
 
 # join the color planes to reform the image
 img = cv.merge((b_deblur, g_deblur, r_deblur))
@@ -167,7 +144,6 @@ deblurred_name = blurred_name + "_deblurred_lam" + str(lam)
 deblurred_path = "img/" + deblurred_name + ".jpg"
 print("Deblurred image:", deblurred_path)
 cv.imwrite(deblurred_path, img)
-
 
 # # ---- OLD DEBLUR ----
 # # Identity matrix I
