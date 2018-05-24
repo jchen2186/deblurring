@@ -53,6 +53,36 @@ def deblur_by_row(plane, side_dem, lam):
 
 	return answer
 
+def deblur_by_col(plane, side_dem, lam):
+    """deblur the color plane by rows, returns the plane deblurred """
+
+    # x is the matrix containing the pixels of the original/unblurred image
+    # y is the matrix containing the pixels of the blurred image
+    # x = (H_T * H + lam * identity).I * H_T * y
+
+    """solve for x = (H^T*H + lam*I)^-1*H^T*y
+    since we don't want to do the inverse, we will solve for (H^T*H + lam*I)x = H^T * y"""
+
+    H = generate_H(side_dem)
+    I = np.matrix(np.identity(side_dem))
+    H_transposed = H.transpose()
+
+    A = H_transposed * H + lam * I
+
+    answer = np.empty((0,side_dem))
+
+    plane = plane.transpose()
+
+    for col in plane:
+        y = np.matrix(col).transpose() # transpose the row
+        right_side = H_transposed * y
+        x = np.linalg.solve(A, right_side) #solve the system of equation to get the deblurred image
+
+        answer = np.append(answer,x.transpose(), axis=0) #append the transpose of that to the matrix
+
+    answer = answer.transpose()
+    return answer
+
 # ------------------- DEFAULTS -------------------
 img_name = "flower1"
 extension = ".jpg"
@@ -118,9 +148,13 @@ cv.imwrite(blurred_path, img_blurred)
 b, g, r = cv.split(img_blurred)
 
 # deblur by rows - apply function to each color
-r_deblur= deblur_by_row(r, width, lam)
+r_deblur = deblur_by_row(r, width, lam)
 g_deblur = deblur_by_row(g, width, lam)
 b_deblur = deblur_by_row(b, width, lam)
+
+r_deblur = deblur_by_col(r_deblur, height, lam)
+g_deblur = deblur_by_col(g_deblur, height, lam)
+b_deblur = deblur_by_col(b_deblur, height, lam)
 
 # deblur again on the columns
 # r_deblur = deblur_by_row(r_deblur.transpose(), x_dem,lam)
