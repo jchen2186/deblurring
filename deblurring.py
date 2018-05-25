@@ -31,8 +31,8 @@ def generate_Dv(size):
     current = 1
     for row in I:
         if current < len(row):
-            row[current] = 1
-            current += -1
+            row[current] = -1
+            current += 1
     return np.matrix(I)
 
 def deblur_by_row(plane, side_dem, lam):
@@ -73,8 +73,8 @@ kernel = 3
 sigma = 3
 
 # lambda > 0 is the control parameter    print(blurred)
-# we vary this to debblur the image
-lam = 3
+# we vary this to deblur the image
+lam = 0.007
 
 # ------------------- USER INPUT -------------------
 print("1. Use defaults.")
